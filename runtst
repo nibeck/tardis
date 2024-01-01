@@ -1,0 +1,2 @@
+sudo /home/pi/Documents/python/tardis/env/bin/python /home/pi/Documents/python/tardis/$1 -cll
+
