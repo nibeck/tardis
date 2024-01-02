@@ -8,15 +8,15 @@ class TARDIS:
         self.doctor = doctor if doctor is not None else ""
         self.color = color if color is not None else Color(0,0,0) 
         # Windows
-        self.frontWindow = window("front", Color(255,255,255), 50)
-        self.backWindow = window("back", Color(255,255,255), 50)
-        self.rtWindow = window("right", Color(255,255,255), 50)
-        self.leftWindow = window("left", Color(255,255,255), 50)
+        self.frontWindow = Window("front", Color(255,255,255), 50)
+        self.backWindow = Window("back", Color(255,255,255), 50)
+        self.rtWindow = Window("right", Color(255,255,255), 50)
+        self.leftWindow = Window("left", Color(255,255,255), 50)
         # Signs
-        self.frontSign = sign(Color(255,255,255), 0)
-        self.backSign = sign(Color(255,255,255), 0)
-        self.rtSign = sign(Color(255,255,255), 0)
-        self.leftSign = sign(Color(255,255,255), 0)
+        self.frontSign = Sign(Color(255,255,255), 0)
+        self.backSign = Sign(Color(255,255,255), 0)
+        self.rtSign = Sign(Color(255,255,255), 0)
+        self.leftSign = Sign(Color(255,255,255), 0)
         # top Light
         self.topLightClor = Color(0,0,0)
         self.topLightBrightness = 0
@@ -36,7 +36,7 @@ class TARDIS:
         self.rtWindow.turnOn()
         self.leftWindow.turnOn()
 
-class window:
+class Window:
     def __init__(self, location, color, brightness):
         self.color = color if color is not None else Color(255,255,255)
         self.location = location if location is not None else "front"
@@ -133,7 +133,7 @@ class window:
                 self.setColor(adjustedColor)
                 time.sleep(delay)
 
-class sign:
+class Sign:
     def __init__(self, color, brightness):
         self.color = color if color is not None else Color(0.0,0)
         self.brightness = brightness if brightness is not None else 0
@@ -148,13 +148,7 @@ LED_BRIGHTNESS = 65      # Set to 0 for darkest and 255 for brightest
 LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
-#
-# blue = Color(0,0,255)
-# black = Color(0,0,0)
-# white = Color(255,255,255)
-# red = Color(255,0,0)
-# purple = Color(127,0,255)
-#
+
 # Create NeoPixel object with appropriate configuration.
 lightStrip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
 

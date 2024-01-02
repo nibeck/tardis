@@ -6,15 +6,15 @@ import argparse
 import colorsys
 from tardis import TARDIS
 
-blue    = Color(0,0,255)
-black   = Color(0,0,0)
-white   = Color(255,255,255)
-red     = Color(255,0,0)
-purple  = Color(127,0,255)
-yellow  = Color(255,255,0)
-green   = Color(50,205,50)
-teal    = Color(100,128,128)
-navy    = Color(0,0,128)
+BLUE    = Color(0,0,255)
+BLACK   = Color(0,0,0)
+WHITE   = Color(255,255,255)
+RED     = Color(255,0,0)
+PURPLE  = Color(127,0,255)
+YELLOW  = Color(255,255,0)
+GREEN   = Color(50,205,50)
+TEAL    = Color(100,128,128)
+NAVY    = Color(0,0,128)
 
 def fadeWindow(window, delay, cycles):
     brightnessPercentage = 100
@@ -23,7 +23,7 @@ def fadeWindow(window, delay, cycles):
     startG = startColor.g 
     startB = startColor.b 
 
-    while window.color != black:
+    while window.color != BLACK:
         window.setBrightness(brightnessPercentage)
         brightnessPercentage = brightnessPercentage - 1
         myTARDIS.backWindow.updateLEDs()
@@ -137,12 +137,12 @@ def pulseLightness(delay):
             time.sleep(delay)
 
 
-myTARDIS = TARDIS("Mike Nibeck", blue)
-myTARDIS.backWindow.setColor(blue)
+myTARDIS = TARDIS("Mike Nibeck", BLUE)
+myTARDIS.backWindow.setColor(BLUE)
 # myTARDIS.turnOn
 print(myTARDIS.backWindow.color.r, myTARDIS.backWindow.color.g, myTARDIS.backWindow.color.b)
 print("Backwindow brightness: ", myTARDIS.backWindow.brightness)
-# myTARDIS.backWindow.setColor(red)
+# myTARDIS.backWindow.setColor(RED)
 time.sleep(1)
 # myTARDIS.backWindow.setBrightness(50)
 time.sleep(1)
