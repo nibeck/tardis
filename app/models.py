@@ -5,6 +5,7 @@ import colorsys
 
 # TODO: Expose as restful services
 # TODO: redo get() set() properly for tardis oject
+# TODO: Replace Window getters/setters with property
 
 #setup some comnstants
 LED_COUNT      = 40         # Number of LED pixels.
@@ -51,7 +52,6 @@ class TARDIS:
         # self.leftWindow.brightness = 50
 
         # Create the 4 Signs
-        # TODO: Replace getters/setters with property
         self.frontSign = Sign(Color(255,255,255), 0)
         self.backSign = Sign(Color(255,255,255), 0)
         self.rtSign = Sign(Color(255,255,255), 0)
@@ -171,6 +171,7 @@ class Window:
 
     def flash(self, cycles, delay):
         origColor = self.color
+
         for n in range(cycles):
             time.sleep(delay)
             self.color = origColor
