@@ -1,14 +1,12 @@
 import time
-import math
 import signal
 import sys
 from rpi_ws281x import *
-import argparse, colorsys
 from app.models import TARDIS
-from flask import Flask
 from flask import request
-from flask import render_template
+from flask import render_template, flash, redirect, url_for
 from app import app
+from app.forms import ControlForm
 
 # TODO: Invetigate ruuning asyn or in parallel 
 # TODO: Wrap in a simple Web UI
@@ -32,7 +30,7 @@ print("Thge doctor is in", myTARDIS.doctor)
 @app.route('/')
 @app.route('/index')
 def index():
-    user = {'usrename':'Mike'}
+    user = {'username':'Mike'}
     print("in the main index route")
     return render_template('index.html', title='Your Own TARDIS', user=user)
 

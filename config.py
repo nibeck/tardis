@@ -1,4 +1,4 @@
-import os, colorsys
+import os
 from rpi_ws281x import *
 
 basedir = os.path.abspath(os.path.dirname(__file__))
