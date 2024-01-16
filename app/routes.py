@@ -8,8 +8,11 @@ from flask import render_template, flash, redirect, url_for
 from app import app
 from app.forms import ControlForm
 
+# TODO: Load all data from model
+# TODO: Add Top Light to model
+# TODO: Validate all inputs
+# TODO: Implement bootstrap
 # TODO: Invetigate ruuning asyn or in parallel 
-# TODO: Wrap in a simple Web UI
 
 BLUE    = Color(0,0,255)
 BLACK   = Color(0,0,0)
@@ -27,12 +30,19 @@ NAVY    = Color(0,0,128)
 myTARDIS = TARDIS("Mike Nibeck", BLUE)
 print("Thge doctor is in", myTARDIS.doctor)
 
-@app.route('/')
+@app.route('/', methods=('GET', 'POST'))
 @app.route('/index')
 def index():
     user = {'username':'Mike'}
-    print("in the main index route")
-    return render_template('index.html', title='Your Own TARDIS', user=user)
+    # Set values from TARDIOS Object
+    form=ControlForm(back_window_state=True, front_window_color=myTARDIS.frontWindow.color)
+    if form.validate_on_submit():
+        # update the TARDIS pi
+        print("updting here")
+        return redirect('index.html')
+    print("updting here2")
+
+    return render_template('index.html', title='Your Own TARDIS', user=user, form=form)
 
 @app.route('/tardis/off')
 def off():

@@ -1,5 +1,3 @@
-Flask==3.0.0
+Flask
 flask-wtf
-rpi_ws281x==5.0
-python-dotenv
-colorsys
+rpi_ws281x
