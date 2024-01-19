@@ -5,7 +5,7 @@ import colorsys
 
 # TODO: Expose as restful services
 # TODO: redo get() set() properly for tardis oject
-# TODO: Replace Window getters/setters with property
+# TODO: Add signs and top light objects
 
 #setup some comnstants
 LED_COUNT      = 40         # Number of LED pixels.
@@ -34,22 +34,22 @@ class TARDIS:
         self.frontWindow = Window()
         self.frontWindow.location = "front"
         self.frontWindow.color = Color(0,0,0)
-        # self.frontWindow.brightness = 50
+        self.frontWindow.brightness = 0
 
         self.backWindow = Window()
         self.backWindow.location = "back"
         self.backWindow.color = Color(0,0,0)
-        # self.backWindow.brightness = 50
+        self.backWindow.brightness = 0
 
         self.rtWindow = Window()
         self.rtWindow.location = "right"
         self.rtWindow.color = Color(0,0,0)
-        # self.rtWindow.brightness = 50
+        self.rtWindow.brightness = 0
 
         self.leftWindow = Window()
         self.leftWindow.location = "left"
         self.leftWindow.color = Color(0,0,0)
-        # self.leftWindow.brightness = 50
+        self.leftWindow.brightness = 0
 
         # Create the 4 Signs
         self.frontSign = Sign(Color(255,255,255), 0)
