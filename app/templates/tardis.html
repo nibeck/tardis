@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+
+    * { outline: 1px red;}
+
+    .bottom-layer {
+      position: absolute;
+      /* top:100px; */
+      z-index: 1;
+    }
+    .top-layer {
+      position: absolute;
+      /* top:100px; */
+      z-index: 2;
+    }
+    .control-layer {
+      position: relative;
+      top: 600px;
+      left: 0px;
+      z-index: 2;
+    }
+</style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="bottom-layer"> <object id="window-color-object" type="image/svg+xml" data="window_color.svg" width="100%" height="100%"></object></div>
+        <div class="top-layer"><object id="tardis-object" type="image/svg+xml" data="TARDIS.svg" width="100%" height="100%"></object></div>
+        <!-- <div class="control-layer"><button onclick="updatePathColor()">Change Color</button></div> -->
+        <div class="control-layer">
+          <div class="form-group form-inline">   
+            <label for="light-color" class="form-label">Color</label>
+            <input type="color" class="form-control form-control-color w-25" 
+                          id="light-color" 
+                          value="#FCFCFC" 
+                          title="Choose your color">
+            <div class="range container">
+              <input type="range" id="brightness" class="custom-range w-25" min="0" max="100" value="100">
+            </div>              
+          </div>    
+        </div>
+     </div>
+
+  <script>
+      var currentColor = "white";
+
+      var rangeInput = document.getElementById("brightness");
+      // Add an event listener for brightness changes
+      rangeInput.addEventListener("input", function() {
+        // Access the current value of the range input
+        var brightnessValue = rangeInput.value;
+
+        // Log or perform any action with the current value
+        console.log("Current Value:", brightnessValue);
+        var originalColor = tinycolor(currentColor);
+        // New, darker color
+        var newColor = originalColor.brighten(rangeInput.value - 100).toString();
+        updatePathColor(newColor);
+      });
+
+      var colorInput = document.getElementById("light-color");
+
+      // Event listener for color changes
+      colorInput.addEventListener("input", function() {
+        console.log("Selected Color:", colorInput.value);
+        updatePathColor(colorInput.value);
+        currentColor=colorInput.value
+      });
+
+      function updatePathColor(newColor) {
+          var object = document.getElementById("window-color-object");
+              console.log("Changing Color:", newColor);
+
+              var svgDoc = object.contentDocument;    
+              // Find the specific path element within the SVG (you may need to adjust the selector)
+              var pathElement = svgDoc.querySelector("path");
+              // Update the path color
+              pathElement.style.fill = newColor; // You can set any desired color or use a function to generate one
+      }; 
+  </script>
+
+  <!-- Bootstrap JS and Popper.js -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.1/tinycolor.min.js"></script>
+</body>
+</html>

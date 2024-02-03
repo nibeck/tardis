@@ -2,16 +2,18 @@ import time
 import signal
 import sys
 import math
+import json
+
 from rpi_ws281x import *
 from app.models import TARDIS
 from flask import request
 from flask import render_template, flash, redirect, url_for, jsonify
 from app import app
 from app.forms import ControlForm
+from app.color_util import getRGBfromI, getIfromRGB, rgb_to_hex, hex_to_rgb
+from pprint import pprint
 
 # TODO: Add Top Light to model
-# TODO: Validate all inputs
-# TODO: Implement bootstrap
 # TODO: Invetigate ruuning asyn or in parallel
 
 BLUE = Color(0, 0, 255)
@@ -25,32 +27,47 @@ TEAL = Color(100, 128, 128)
 NAVY = Color(0, 0, 128)
 
 
-# color cobversion function - return RGB of Color() object
-def getRGBfromI(RGBint):
-    blue = RGBint & 255
-    green = (RGBint >> 8) & 255
-    red = (RGBint >> 16) & 255
-    return red, green, blue
+# # color cobversion function - return RGB of Color() object
+# def getRGBfromI(RGBint):
+#     blue = RGBint & 255
+#     green = (RGBint >> 8) & 255
+#     red = (RGBint >> 16) & 255
+#     return red, green, blue
 
 
-def getIfromRGB(rgb):
-    red = rgb[0]
-    green = rgb[1]
-    blue = rgb[2]
-    # print red, green, blue
-    RGBint = (red << 16) + (green << 8) + blue
-    return RGBint
+# def getIfromRGB(rgb):
+#     red = rgb[0]
+#     green = rgb[1]
+#     blue = rgb[2]
+#     # print red, green, blue
+#     RGBint = (red << 16) + (green << 8) + blue
+#     return RGBint
 
+
+# def rgb_to_hex(r, g, b):
+#     return "#{:02x}{:02x}{:02x}".format(r, g, b)
+
+
+# def hex_to_rgb(hex):
+#     rgb = []
+#     for i in (0, 2, 4):
+#         decimal = int(hex[i : i + 2], 16)
+#         rgb.append(decimal)
+
+#     return tuple(rgb)
 
 # Create TARDIS object
-myTARDIS = TARDIS("Dave Nibeck", app.config["RED"])
+myTARDIS = TARDIS("Mike Nibeck", app.config["RED"])
+
+pprint(vars(myTARDIS), indent=2)
+pprint(vars(myTARDIS.frontWindow))
 
 
 @app.route("/", methods=("GET", "POST"))
 @app.route("/index")
 def index():
-    # Set values from TARDIOS Object
-    print("entering the /index route")
+    # Set values from TARDIS Object
+
     form = ControlForm(
         tardis_doctor=myTARDIS.doctor,
         back_window_brightness=myTARDIS.backWindow.brightness,
@@ -62,16 +79,9 @@ def index():
         left_window_brightness=myTARDIS.leftWindow.brightness,
         left_window_color=myTARDIS.leftWindow.color,
     )
+
     if form.validate_on_submit():
         return redirect("index.html")
-
-    newColor = getRGBfromI(int(form.front_window_color.data))
-    myTARDIS.frontWindow.color = Color(newColor[0], newColor[1], newColor[2])
-    myTARDIS.frontWindow.brightness = form.front_window_brightness.data
-    if form.front_window_brightness.data == 0:
-        myTARDIS.frontWindow.turnOff()
-    else:
-        myTARDIS.frontWindow.turnOn()
 
     # Update Rear Window
     newColor = getRGBfromI(int(form.back_window_color.data))
@@ -82,30 +92,24 @@ def index():
     else:
         myTARDIS.backWindow.turnOn()
 
-    # Update Right Window
-    newColor = getRGBfromI(int(form.right_window_color.data))
-    myTARDIS.rtWindow.color = Color(newColor[0], newColor[1], newColor[2])
-    myTARDIS.rtWindow.brightness = form.right_window_brightness.data
-    if form.right_window_brightness.data == 0:
-        myTARDIS.rtWindow.turnOff()
-    else:
-        myTARDIS.rtWindow.turnOn()
-
-    # Update Left Window
-    newColor = getRGBfromI(int(form.left_window_color.data))
-    myTARDIS.leftWindow.color = Color(newColor[0], newColor[1], newColor[2])
-    myTARDIS.leftWindow.brightness = form.left_window_brightness.data
-    if form.left_window_brightness.data == 0:
-        myTARDIS.leftWindow.turnOff()
-    else:
-        myTARDIS.leftWindow.turnOn()
     return render_template("index.html", title="Your Own TARDIS", form=form)
 
 
 @app.route("/tardis/off")
 def off():
+    form = ControlForm(
+        tardis_doctor=myTARDIS.doctor,
+        back_window_brightness=myTARDIS.backWindow.brightness,
+        back_window_color=myTARDIS.backWindow.color,
+        front_window_brightness=myTARDIS.frontWindow.brightness,
+        front_window_color=myTARDIS.frontWindow.color,
+        right_window_brightness=myTARDIS.rtWindow.brightness,
+        right_window_color=myTARDIS.rtWindow.color,
+        left_window_brightness=myTARDIS.leftWindow.brightness,
+        left_window_color=myTARDIS.leftWindow.color,
+    )
     myTARDIS.turnOff()
-    return "Bye!"
+    return render_template("index.html", title="Your Own TARDIS", form=form)
 
 
 @app.route("/flashes")
@@ -121,43 +125,149 @@ def flashTest():
     time.sleep(1)
 
     myTARDIS.turnOff()
-    return "Flashy lights!"
+    return render_template("index.html", title="Your Own TARDIS", form=form)
 
 
 @app.route("/window/front/pulse", methods=["GET", "POST"])
 def front_window_pulseWindow():
+    form = ControlForm(
+        tardis_doctor=myTARDIS.doctor,
+        back_window_brightness=myTARDIS.backWindow.brightness,
+        back_window_color=myTARDIS.backWindow.color,
+        front_window_brightness=myTARDIS.frontWindow.brightness,
+        front_window_color=myTARDIS.frontWindow.color,
+        right_window_brightness=myTARDIS.rtWindow.brightness,
+        right_window_color=myTARDIS.rtWindow.color,
+        left_window_brightness=myTARDIS.leftWindow.brightness,
+        left_window_color=myTARDIS.leftWindow.color,
+    )
     cycles = request.args.get("cycles")
     delay = request.args.get("delay")
     print("Cycles:", cycles, " Delay=", delay)
     myTARDIS.frontWindow.pulseWindow(int(cycles), float(delay))
-    return "Flashy"
+
+    return render_template("index.html", title="Your Own TARDIS", form=form)
 
 
 @app.route("/window/front/update_color", methods=["POST"])
 def front_window_color():
+    print("Updating color")
+
+    form = ControlForm(
+        tardis_doctor=myTARDIS.doctor,
+        back_window_brightness=myTARDIS.backWindow.brightness,
+        back_window_color=myTARDIS.backWindow.color,
+        front_window_brightness=myTARDIS.frontWindow.brightness,
+        front_window_color=myTARDIS.frontWindow.color,
+        right_window_brightness=myTARDIS.rtWindow.brightness,
+        right_window_color=myTARDIS.rtWindow.color,
+        left_window_brightness=myTARDIS.leftWindow.brightness,
+        left_window_color=myTARDIS.leftWindow.color,
+    )
+
     picked_color = request.form.get("color")
     # Strip # from front of hex value
     h = picked_color.lstrip("#")
     # extract RGB values from the hex number.
     rgb = tuple(int(h[i : i + 2], 16) for i in (0, 2, 4))
 
-    # Set window color
     myTARDIS.frontWindow.color = Color(rgb[0], rgb[1], rgb[2])
+    form.front_window_color = Color(rgb[0], rgb[1], rgb[2])
+
     myTARDIS.frontWindow.turnOn()
-    return jsonify({"status": "success"})
-    # return 'Window On'
+    return render_template("index.html", title="Your Own TARDIS", form=form)
+
+
+@app.route("/window/update_color", methods=["POST"])
+def update_window_color():
+    print("window/update_color/ Updating color from web form")
+
+    form = ControlForm(
+        tardis_doctor=myTARDIS.doctor,
+        back_window_brightness=myTARDIS.backWindow.brightness,
+        back_window_color=myTARDIS.backWindow.color,
+        front_window_brightness=myTARDIS.frontWindow.brightness,
+        front_window_color=myTARDIS.frontWindow.color,
+        right_window_brightness=myTARDIS.rtWindow.brightness,
+        right_window_color=myTARDIS.rtWindow.color,
+        left_window_brightness=myTARDIS.leftWindow.brightness,
+        left_window_color=myTARDIS.leftWindow.color,
+    )
+
+    what_color = request.values.get("color")
+    which_window = request.values.get("window")
+
+    print("Window:", which_window)
+    print("Color:", what_color)
+    # Strip # from front of hex value
+    what_color = what_color.lstrip("#")
+    what_color = what_color.lstrip("%")
+    print("Color:", what_color)
+
+    rgb = hex_to_rgb(what_color)
+
+    match which_window:
+        case "front":
+            print("New Front color")
+            myTARDIS.frontWindow.color = Color(rgb[0], rgb[1], rgb[2])
+            form.front_window_color = Color(rgb[0], rgb[1], rgb[2])
+            myTARDIS.frontWindow.turnOn()
+        case "rear":
+            print("Rear Color")
+            myTARDIS.backWindow.color = Color(rgb[0], rgb[1], rgb[2])
+            form.back_window_color = Color(rgb[0], rgb[1], rgb[2])
+            myTARDIS.rearWindow.turnOn()
+        case "right":
+            print("Right Color")
+            myTARDIS.rtWindow.color = Color(rgb[0], rgb[1], rgb[2])
+            form.right_window_color = Color(rgb[0], rgb[1], rgb[2])
+            myTARDIS.rtWindow.turnOn()
+        case "left":
+            print("Left Color")
+            myTARDIS.leftWindow.color = Color(rgb[0], rgb[1], rgb[2])
+            form.left_window_color = Color(rgb[0], rgb[1], rgb[2])
+            myTARDIS.leftWindow.turnOn()
+
+    return render_template("index.html", title="Your Own TARDIS", form=form)
+
+
+@app.route("/window/front/on", methods=["POST"])
+def front_window_on():
+    myTARDIS.frontWindow.turnOn()
+    print("Turning on")
+    return render_template("index.html")
+
+
+@app.route("/window/front/off", methods=["POST"])
+def front_window_off():
+    print("Turning off")
+    myTARDIS.frontWindow.turnOff()
 
 
 @app.route("/window/front/update_brightness", methods=["POST"])
 def front_window_brightness():
+    form = ControlForm(
+        tardis_doctor=myTARDIS.doctor,
+        back_window_brightness=myTARDIS.backWindow.brightness,
+        back_window_color=myTARDIS.backWindow.color,
+        front_window_brightness=myTARDIS.frontWindow.brightness,
+        front_window_color=myTARDIS.frontWindow.color,
+        right_window_brightness=myTARDIS.rtWindow.brightness,
+        right_window_color=myTARDIS.rtWindow.color,
+        left_window_brightness=myTARDIS.leftWindow.brightness,
+        left_window_color=myTARDIS.leftWindow.color,
+    )
     picked_brightness = request.form.get("selectedBrightness")
-    print("In python:", picked_brightness)
+    print("New brightness:", picked_brightness)
 
     # Set window brightness
     myTARDIS.frontWindow.brightness = int(picked_brightness)
-    myTARDIS.frontWindow.turnOn()
-    return jsonify({"status": "success"})
-    # return 'Window On'
+    form.front_window_brightness = myTARDIS.frontWindow.brightness
+    if picked_brightness == "0":
+        myTARDIS.frontWindow.turnOff()
+    else:
+        myTARDIS.frontWindow.turnOn()
+    return render_template("index.html", title="Your Own TARDIS", form=form)
 
 
 # main driver function
