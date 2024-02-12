@@ -1,11 +1,6 @@
-import time
-import math
-from rpi_ws281x import *
+import time, math, random
+from rpi_ws281x import Color, PixelStrip
 import colorsys
-
-# TODO: Expose as restful services
-# TODO: redo get() set() properly for tardis oject
-# TODO: Add signs and top light objects
 
 # setup some comnstants
 LED_COUNT = 40  # Number of LED pixels.
@@ -25,53 +20,57 @@ YELLOW = Color(255, 255, 0)
 GREEN = Color(50, 205, 50)
 TEAL = Color(100, 128, 128)
 NAVY = Color(0, 0, 128)
+LIGHTRED = Color(5, 0, 0)
+TARDISBLUE = Color(0, 59, 111)
+GRAY = Color(66, 66, 66)
+
+
+def rgb_int2tuple(rgbint):
+    return (rgbint // 256 // 256 % 256, rgbint // 256 % 256, rgbint % 256)
+
+
+def random_color_generator():
+    r = random.randint(0, 255)
+    g = random.randint(0, 255)
+    b = random.randint(0, 255)
+    return Color(r, g, b)
 
 
 class TARDIS:
     def __init__(self, doctor, color):
         self.doctor = doctor if doctor is not None else ""
-        self.color = color if color is not None else Color(0, 0, 0)
+        self.color = color if color is not None else TARDISBLUE
         # Create the 4 Windows
-        self.frontWindow = Window()
+
+        self.frontWindow = self.Window()
         self.frontWindow.location = "front"
-        self.frontWindow.color = Color(0, 0, 0)
-        self.frontWindow.brightness = 0
+        self.frontWindow.color = GRAY
+        self.frontWindow.prevColor = self.frontWindow.color
+        self.frontWindow.brightness = 50
 
-        self.backWindow = Window()
+        self.backWindow = self.Window()
         self.backWindow.location = "back"
-        self.backWindow.color = Color(0, 0, 0)
-        self.backWindow.brightness = 0
+        self.backWindow.color = GRAY
+        self.backWindow.prevColor = self.backWindow.color
+        self.backWindow.brightness = 50
 
-        self.rtWindow = Window()
+        self.rtWindow = self.Window()
         self.rtWindow.location = "right"
-        self.rtWindow.color = Color(0, 0, 0)
-        self.rtWindow.brightness = 0
+        self.rtWindow.color = GRAY
+        self.rtWindow.prevColor = self.rtWindow.color
+        self.rtWindow.brightness = 50
 
-        self.leftWindow = Window()
+        self.leftWindow = self.Window()
         self.leftWindow.location = "left"
-        self.leftWindow.color = Color(0, 0, 0)
-        self.leftWindow.brightness = 0
+        self.leftWindow.color = GRAY
+        self.leftWindow.prevColor = self.leftWindow.color
+        self.leftWindow.brightness = 50
 
-        # Create the 4 Signs
-        self.frontSign = Sign(Color(255, 255, 255), 0)
-        self.backSign = Sign(Color(255, 255, 255), 0)
-        self.rtSign = Sign(Color(255, 255, 255), 0)
-        self.leftSign = Sign(Color(255, 255, 255), 0)
         # top Light
-        self.topLightClor = Color(0, 0, 0)
-        self.topLightBrightness = 0
-
-        # initialize light strip
-        self.lightStrip = Adafruit_NeoPixel(
-            LED_COUNT,
-            LED_PIN,
-            LED_FREQ_HZ,
-            LED_DMA,
-            LED_INVERT,
-            LED_BRIGHTNESS,
-            LED_CHANNEL,
-        )
-        self.lightStrip.begin()
+        self.topLightColor = GRAY
+        self.topLightPrevColor = self.topLightColor
+        self.topLightBrightness = 50
+        self.topLightPrevBrioghtness = self.topLightBrightness
 
     def turnOff(self):
         self.frontWindow.turnOff()
@@ -80,10 +79,10 @@ class TARDIS:
         self.leftWindow.turnOff()
 
     def turnOn(self):
-        self.frontWindow.setColor(WHITE)
-        self.backWindow.setColor(WHITE)
-        self.rtWindow.setColor(WHITE)
-        self.leftWindow.setColor(WHITE)
+        self.frontWindow.turnOn()
+        self.backWindow.turnOn()
+        self.rtWindow.turnOn()
+        self.leftWindow.turnOn()
 
     def rainbow(self):
         self.frontWindow.setColor(RED)
@@ -91,148 +90,178 @@ class TARDIS:
         self.rtWindow.setColor(TEAL)
         self.leftWindow.setColor(NAVY)
 
-    def flash(self):
-        self.backSign
+    def randomColors(self):
+        self.frontWindow.randomColor()
+        self.backWindow.randomColor()
+        self.rtWindow.randomColor()
+        self.leftWindow.randomColor()
 
+    def setWindowColors(self, newColor):
+        self.frontWindow.color = newColor
+        self.backWindow.color = newColor
+        self.rtWindow.color = newColor
+        self.leftWindow.color = newColor
 
-class Window:
-    def __init__(self):
-        self._color = Color(0, 0, 0)
-        self._brightness = 0
-        self._window_state = False
+    class Window:
+        def __init__(self):
+            self._color = WHITE
+            self.prevColor = BLACK
+            self._brightness = 50
+            self.prevBrightness = 0
 
-    @property
-    def color(self):
-        return self._color
+        @property
+        def color(self):
+            return self._color
 
-    @color.setter
-    def color(self, new_color):
-        self._color = new_color
-        self.updateLED_color()
+        @color.setter
+        def color(self, new_color):
+            self.prevColor = self.color
+            self._color = new_color
+            self.updateLED_color()
 
-    @property
-    def brightness(self):
-        return self._brightness
+        @property
+        def brightness(self):
+            return self._brightness
 
-    @brightness.setter
-    def brightness(self, new_brightness):
-        # ensure brightness apssed in is betwen 0 and 100
-        new_brightness = max(min(new_brightness, 100), 0)
+        @brightness.setter
+        def brightness(self, new_brightness):
+            # print("In brightness setter")
 
-        # Perform linear mapping - map to 0-50 (50=maximum brightness)
-        # allow user to pass in 100 as max as that feels more normal.
-        # do this mapping interannly to increase ease of use
-        #       (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-        mapped_value = (new_brightness - 0) * (50 - 1) / (100 - 0) + 1
-        # Round the result to an integer (optional, depending on your needs)
-        mapped_value = int(round(mapped_value))
+            # ensure brightness apssed in is betwen 0 and 100
+            new_brightness = max(min(new_brightness, 100), 0)
 
-        # nromalize RGB valies to prepare for the hls conversion
-        normalizedRed = self.color.r / 255
-        normalizedGreen = self.color.g / 255
-        normalizedBlue = self.color.b / 255
+            # Perform linear mapping - map to 0-50 (50=maximum brightness)
+            # allow user to pass in 100 as max as that feels more normal.
+            # do this mapping internally to increase ease of use
+            #       (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+            mapped_brightness = (new_brightness - 0) * (50 - 1) / (100 - 0) + 1
+            # Round the result to an integer (optional, depending on your needs)
+            mapped_brightness = int(round(mapped_brightness))
 
-        # convert RGB valiues into Hls values
-        hue, origLightness, saturation = colorsys.rgb_to_hls(
-            normalizedRed, normalizedGreen, normalizedBlue
-        )
-        # convert back to rgb usinf hls with new brightness values passed in (divide by 100 to put it inhls range (.1-1.0)
-        newR, newG, newB = colorsys.hls_to_rgb(hue, mapped_value / 100, saturation)
-        # normalize new RGB valies from the HLS conversion
-        newR = newR * 255
-        newG = newG * 255
-        newB = newB * 255
+            # normalize RGB valies of the current color to prepare for the hls conversion
+            normalizedRed = self.color.r / 255
+            normalizedGreen = self.color.g / 255
+            normalizedBlue = self.color.b / 255
 
-        # set the new color of the window
-        adjustedColor = Color(math.trunc(newR), math.trunc(newG), math.trunc(newB))
-        self.color = adjustedColor
-        lightStrip.show()
-        self._brightness = new_brightness
+            # convert RGB values into HlS values, so we can extract the "lightness" of the current color
+            hue, origLightness, saturation = colorsys.rgb_to_hls(
+                normalizedRed, normalizedGreen, normalizedBlue
+            )
+            if mapped_brightness == 0:
+                mapped_brightness = 1
 
-    @property
-    def location(self):
-        return self._location
+            # convert back to rgb using hls with new brightness values passed in (divide by 100 to put it inhls range (.1-1.0)
+            newR, newG, newB = colorsys.hls_to_rgb(
+                hue, mapped_brightness / 100, saturation
+            )
+            # normalize new RGB valies from the HLS conversion, so we can cobert back to RBG, which the LEDs need
+            newR = newR * 255
+            newG = newG * 255
+            newB = newB * 255
 
-    @location.setter
-    def location(self, new_location):
-        self._location = new_location
-        match self._location:
-            case "front":
-                self.ledIndices = range(10)  # 0-9
-            case "right":
-                self.ledIndices = range(10, 19, 1)  # 10-19
-            case "left":
-                self.ledIndices = range(20, 29, 1)  # 20-29
-            case "back":
-                self.ledIndices = range(30, 39, 1)  # 30-39
-            case _:
-                raise ValueError("Location must be front, right, back, left")
+            # set the new color of the window
+            adjustedColor = Color(math.trunc(newR), math.trunc(newG), math.trunc(newB))
 
-    @property
-    def window_state(self):
-        return self._window_state
+            self.color = adjustedColor
+            self.prevBrightness = self.brightness
+            # set property directly, so you don't trigger this setter method and create a loop
+            self._brightness = new_brightness
 
-    @window_state.setter
-    def window_state(self, new_state):
-        self._window_state = new_state
+            globalLightStrip.show()
 
-    def __str__(self):
-        return "Color: {} Brightness: {} Location: {}".format(
-            self.color, self.brightness, self.location
-        )
+        @property
+        def location(self):
+            return self._location
 
-    def turnOn(self):
-        lightStrip.show()
+        @location.setter
+        def location(self, new_location):
+            self._location = new_location
+            match self._location:
+                case "front":
+                    self.ledIndices = range(10)  # 0-9
+                case "right":
+                    self.ledIndices = range(10, 19, 1)  # 10-19
+                case "left":
+                    self.ledIndices = range(20, 29, 1)  # 20-29
+                case "back":
+                    self.ledIndices = range(30, 39, 1)  # 30-39
+                case _:
+                    raise ValueError("Location must be front, right, back, left")
 
-    def turnOff(self):
-        # Todo: Change to set to 0% brightness onmce brightness is working
-        self.color = Color(0, 0, 0)
-        self.updateLED_color()
-        lightStrip.show()
+        def __str__(self):
+            return "Window Color {} : PrevColor {} : Brightness {} : PrevBrightness {} : Location {}".format(
+                rgb_int2tuple(self.color),
+                rgb_int2tuple(self.prevColor),
+                self.brightness,
+                self.prevBrightness,
+                self.location,
+            )
 
-    def updateLED_color(self):
-        for ix in self.ledIndices:
-            lightStrip.setPixelColor(ix, self.color)
-        # lightStrip.show()
+        def turnOn(self):
+            self._brightness = self.prevBrightness
+            self.color = self.prevColor
+            self.prevColor = BLACK
+            self.updateLED_color()
 
-    def flash(self, cycles, delay):
-        origColor = self.color
+        def turnOff(self):
+            self.prevColor = self.color
+            self.prevBrightness = self.brightness
+            self.color = BLACK
+            self.updateLED_color()
 
-        for n in range(cycles):
-            time.sleep(delay)
-            self.color = origColor
-            lightStrip.show()
-            time.sleep(delay)
-            self.brightness = 0
-            lightStrip.show()
-        self.color = origColor
+        def updateLED_color(self):
+            for ix in self.ledIndices:
+                globalLightStrip.setPixelColor(ix, self.color)
+            globalLightStrip.show()
 
-    def pulseWindow(self, cycles, delay):
-        # save starting point so we can return to it
-        starting_brightness = self.brightness
-        # iterate through changing brightness as we go
-        for cycles in range(cycles):
-            # start at current brightness and go down to 0
-            for newbrightness in range(starting_brightness, 1, -1):
-                self.brightness = newbrightness
-                self.turnOn()
+        def flash(self, cycles, delay):
+            # Save state
+            currentColor = self.color
+            currentBrightness = self.brightness
+            for n in range(cycles):
                 time.sleep(delay)
-            for newbrightness in range(1, starting_brightness, 1):
-                self.brightness = newbrightness
-                self.turnOn()
+                self.turnOff()
                 time.sleep(delay)
+                self.turnOn()
+                # print(self)
+            self.brightness = currentBrightness
+            self.color = currentColor
 
+        def pulse(self, cycles, delay):
+            # save starting point so we can return to it
+            starting_Brightness = self.brightness
+            starting_Color = self.color
+            # print("Starting color-brightness - ", starting_Color, starting_Brightness)
+            # iterate through changing brightness as we go
+            for cycles in range(cycles):
+                # start at current brightness and go down to 1 (don't go to 0 as it will flip color to white)
+                for newbrightness in range(starting_Brightness, 1, -1):
+                    self.brightness = newbrightness
+                    # self.turnOn()
+                    # print("Brightness: ", newbrightness)
+                    time.sleep(delay)
+                for newbrightness in range(1, starting_Brightness, 1):
+                    # print("Brightness: ", newbrightness)
+                    self.brightness = newbrightness
+                    # self.turnOn()
+                    time.sleep(delay)
+            self.color = starting_Color
+            self._brightness = starting_Brightness
+            self.updateLED_color()
 
-class Sign:
-    def __init__(self, color, brightness):
-        self.color = color if color is not None else Color(0.0, 0)
-        self.brightness = brightness if brightness is not None else 0
+        def randomColor(self):
+            self.color = random_color_generator()
+
+        # class Sign:
+        # def __init__(self, color, brightness):
+        #     self.color = color if color is not None else Color(0.0, 0)
+        #     self.brightness = brightness if brightness is not None else 0
 
 
 # Create NeoPixel object with appropriate configuration.
-lightStrip = Adafruit_NeoPixel(
+globalLightStrip = PixelStrip(
     LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL
 )
 
 # Intialize the library (must be called once before other functions).
-lightStrip.begin()
+globalLightStrip.begin()
