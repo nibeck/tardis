@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "bootstrap_wtf.html" as wtf %}
+
+{% block content %}
+    <form action="" method="post">
+    <p>
+        <h2>TARDIS Info</h2>
+        {{ form.tardis_doctor.label }}
+        {{ form.tardis_doctor(size=40) }}<br>
+        {{ form.tardis_color.label }}
+        {{ form.tardis_color(size=10) }}
+        <br>
+        <h3>Front Window</h3>
+        {{ form.front_window_color.label }} 
+        {{ form.front_window_color(size=10) }} <br>
+        {{ form.front_window_brightness.label }} 
+        {{ form.front_window_brightness() }}         
+        <br>
+        <h3>Back Window</h3>
+        {{ form.back_window_color.label }} 
+        {{ form.back_window_color(size=10) }} <br>
+        {{ form.back_window_brightness.label }} 
+        {{ form.back_window_brightness() }} 
+        <h3>Left Window</h3>
+        {{ form.left_window_color.label }} 
+        {{ form.left_window_color(size=10) }} <br>
+        {{ form.left_window_brightness.label }} 
+        {{ form.left_window_brightness() }}         
+        <br>
+        <h3>Right Window</h3>
+        {{ form.right_window_color.label }} 
+        {{ form.right_window_color(size=10) }} <br>
+        {{ form.right_window_brightness.label }} 
+        {{ form.right_window_brightness() }} 
+    </p>
+    <p>{{ form.submit() }}</p>
+    </form>
+
+{% endblock %}

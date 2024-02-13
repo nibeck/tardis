@@ -1,39 +1,284 @@
-{% extends "base.html" %}
-{% import "bootstrap_wtf.html" as wtf %}
+<!doctype html>
 
-{% block content %}
-    <form action="" method="post">
-    <p>
-        <h2>TARDIS Info</h2>
-        {{ form.tardis_doctor.label }}
-        {{ form.tardis_doctor(size=40) }}<br>
-        {{ form.tardis_color.label }}
-        {{ form.tardis_color(size=10) }}
-        <br>
-        <h3>Front Window</h3>
-        {{ form.front_window_color.label }} 
-        {{ form.front_window_color(size=10) }} <br>
-        {{ form.front_window_brightness.label }} 
-        {{ form.front_window_brightness() }}         
-        <br>
-        <h3>Back Window</h3>
-        {{ form.back_window_color.label }} 
-        {{ form.back_window_color(size=10) }} <br>
-        {{ form.back_window_brightness.label }} 
-        {{ form.back_window_brightness() }} 
-        <h3>Left Window</h3>
-        {{ form.left_window_color.label }} 
-        {{ form.left_window_color(size=10) }} <br>
-        {{ form.left_window_brightness.label }} 
-        {{ form.left_window_brightness() }}         
-        <br>
-        <h3>Right Window</h3>
-        {{ form.right_window_color.label }} 
-        {{ form.right_window_color(size=10) }} <br>
-        {{ form.right_window_brightness.label }} 
-        {{ form.right_window_brightness() }} 
-    </p>
-    <p>{{ form.submit() }}</p>
-    </form>
+<html lang="en">
+    <!-- Header -->
+    <head>
+        <title>Control your own TARDIS</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    </head>
+    <!-- TARDIS Body -->
+    <body>
+        <!-- TARDIS Header -->
+        <div class="container p-1 my-1 bg-primary text-white" >
+            <h1 class="text-center mt-4">Your TARDIS</h1>
+            Doctor: {{ form.tardis_doctor }}
+            <!-- <h4>TARDIS Color: {{ form.tardis_color }}</h4> -->
+        </div>
+        <!-- Front Window -->
+        <div class="container p-2 my-2 bg-primary text-white" >
+            <div class="col" align="center"> 
+                <h5 class="text-center">Front Window </h5>
+            </div>
+            <div class="col" align="center">
+            </div>
+            <div class="container border bg-light text-dark h-100">
+                <!-- Row - controls -->
+                <div class="row bg-light test-dark">
+                    <div class="col" align="center">
+                        <label for="front-window-color" class="col-form-label">Color</label>
+                        <input  type="color" 
+                                class="form-control form-control-color" 
+                                id="front-window-color" 
+                                value="#563d7c" 
+                                title="Choose your color">
+                </div>
+                    <div class="col" align="center">          
+                        <label for="front-window-brightness" class="form-label">Brightness</label>
+                        <input  type="range" 
+                                class="form-range" 
+                                min="0"
+                                max="100"
+                                value=22
+                                id="front-window-brightness">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Rear Window -->
+        <div class="container p-2 my-2 bg-primary text-white" >
+            <div class="col" align="center"> 
+                <h5 class="text-center">Rear Window </h5>
+            </div>
+            <div class="col" align="center">
+            </div>
+            <div class="container border bg-light text-dark h-100">
+                <!-- Row - controls -->
+                <div class="row bg-light test-dark">
+                    <div class="col" align="center">
+                        <label for="rear-window-color" class="col-form-label">Color</label>
+                        <input  type="color" 
+                                class="form-control form-control-color" 
+                                id="rear-window-color" 
+                                value="#563d7c" 
+                                title="Choose your color">
+                </div>
+                    <div class="col" align="center">          
+                        <label for="rear-window-brightness" class="form-label">Brightness</label>
+                        <input  type="range" 
+                                class="form-range" 
+                                min="0"
+                                max="100"
+                                value=22
+                                id="rear-window-brightness">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Right Window -->
+        <div class="container p-2 my-2 bg-primary text-white" >
+            <div class="col" align="center"> 
+                <h5 class="text-center">Right Window </h5>
+            </div>
+            <div class="col" align="center">
+            </div>
+            <div class="container border bg-light text-dark h-100">
+                <!-- Row - controls -->
+                <div class="row bg-light test-dark">
+                    <div class="col" align="center">
+                        <label for="right-window-color" class="col-form-label">Color</label>
+                        <input  type="color" 
+                                class="form-control form-control-color" 
+                                id="right-window-color" 
+                                value="#563d7c" 
+                                title="Choose your color">
+                </div>
+                    <div class="col" align="center">          
+                        <label for="rear-window-brightness" class="form-label">Brightness</label>
+                        <input  type="range" 
+                                class="form-range" 
+                                min="0"
+                                max="100"
+                                value=22
+                                id="rear-window-brightness">
+                    </div>
+                </div>
+            </div>
+        </div>        
+        <!-- Left Window -->
+        <div class="container p-2 my-2 bg-primary text-white" >
+            <div class="col" align="center"> 
+                <h5 class="text-center">Left Window </h5>
+            </div>
+            <div class="col" align="center">
+            </div>
+            <div class="container border bg-light text-dark h-100">
+                <!-- Row - controls -->
+                <div class="row bg-light test-dark">
+                    <div class="col" align="center">
+                        <label for="left-window-color" class="col-form-label">Color</label>
+                        <input  type="color" 
+                                class="form-control form-control-color" 
+                                id="left-window-color" 
+                                value="#563d7c" 
+                                title="Choose your color">
+                </div>
+                    <div class="col" align="center">          
+                        <label for="rear-window-brightness" class="form-label">Brightness</label>
+                        <input  type="range" 
+                                class="form-range" 
+                                min="0"
+                                max="100"
+                                value=22
+                                id="left-window-brightness">
+                    </div>
+                </div>
+            </div>
+        </div>  
+    </body>
 
-{% endblock %}
+    <!-- TARDIS on/off switch
+    <script>
+        document.getElementById('tardis_switch').addEventListener('change', function(event) {
+
+            var checkbox = document.getElementById("tardis_switch");
+
+            if (checkbox.checked) {
+                // Check if the checkbox is checked
+                fetch('/tardis/on', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'state=' + encodeURIComponent(checkbox),
+                })
+                                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                // Check if the checkbox is checked
+                fetch('/tardis/off', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'state=' + encodeURIComponent(checkbox),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    </script> -->
+
+    <!-- Test - single function to handle multiple controls -->
+    <script>
+        // select all the buttons with the class name "btn"
+        document.getElementById("child").addEventListener("change", function (event) {
+        console.log("Child clicked");
+        event.stopPropagation(); // Stop the event from bubbling up
+        });
+    </script>
+
+    <script>
+        // add a click event listener to the document
+        document.addEventListener("change", function(event) {
+            // check which color swatch was clicked using the event.target.id property
+            console.log(event.target.id)
+
+            var selectedColor = event.target.value;
+            console.log(selectedColor);
+            const data = new URLSearchParams();
+            data.append('color', encodeURIComponent(selectedColor));
+            switch (event.target.id) {
+                case "front-window-color":
+                    data.append('window', 'front');        
+                    break;
+                case "rear-window-color":
+                    data.append('window', 'rear');        
+                    break;
+                case "right-window-color":
+                    data.append('window', 'right');        
+                    break;
+                case "left-window-color":
+                    data.append('window', 'left');        
+                    break;
+                default:
+                    // do nothing if none of the links were clicked
+            }
+
+            console.log('About to call fetch - ');
+
+            fetch('/window/update_color', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: data,
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        
+        });
+    </script>
+
+    <!-- <script>
+        // Add an event listener to the color input to detect changes
+        document.getElementById('front-window-color').addEventListener('change', function(event) {
+            // Get the selected color value
+            var selectedColor = event.target.value;
+            // console.log("Setting color:", selectedColor);
+            // Send an asynchronous POST request to the server
+            fetch('/window/front/update_color', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'color=' + encodeURIComponent(selectedColor),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script> -->
+
+    <script>
+      document.getElementById('front-window-brightness').addEventListener('input', function(event) {
+            // Get the selected brightness value
+            var selectedBrightness = event.target.value;
+            // console.log("Changing rightness:", selectedBrightness);
+            // Send an asynchronous POST request to the server
+            fetch('/window/front/update_brightness', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'selectedBrightness=' + encodeURIComponent(selectedBrightness),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+      </script>
+    </html>
